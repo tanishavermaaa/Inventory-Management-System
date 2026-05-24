@@ -162,7 +162,7 @@ export default function EmployeeOrders() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/products');
+      const res = await axios.get('http://localhost:5001/api/products', { headers });
       // Only show products with stock available
       setProducts(res.data.filter(p => p.stock > 0));
     } catch (err) {
@@ -319,7 +319,7 @@ export default function EmployeeOrders() {
                 <option value="">-- Choose a Product --</option>
                 {products.map(p => (
                   <option key={p._id} value={p._id}>
-                    {p.name} - ${p.price.toFixed(2)} (Stock: {p.stock})
+                    {p.name} (Distributor: {p.distributor_id?.name || 'Global'}) - ₹{p.price.toFixed(2)} (Stock: {p.stock})
                   </option>
                 ))}
               </select>
@@ -330,9 +330,10 @@ export default function EmployeeOrders() {
                 <table style={{ width: '100%', marginBottom: '20px', fontSize: '14px' }}>
                   <tbody>
                     {[
-                      ['Category', orderModal.selectedProduct.category],
-                      ['Price',    `$${Number(orderModal.selectedProduct.price).toFixed(2)}`],
-                      ['In Stock', orderModal.selectedProduct.stock],
+                      ['Category',    orderModal.selectedProduct.category],
+                      ['Price',       `₹${Number(orderModal.selectedProduct.price).toFixed(2)}`],
+                      ['In Stock',    orderModal.selectedProduct.stock],
+                      ['Distributor', orderModal.selectedProduct.distributor_id?.name || 'Global'],
                     ].map(([k, v]) => (
                       <tr key={k}>
                         <td style={{ color: '#888', paddingBottom: '10px', width: '90px' }}>{k}</td>
@@ -370,7 +371,7 @@ export default function EmployeeOrders() {
                 {!qtyError && quantity >= 1 && (
                   <p style={{ fontSize: '14px', color: '#555', marginBottom: '20px' }}>
                     Total: <strong style={{ color: '#198754', fontSize: '16px' }}>
-                      ${(quantity * orderModal.selectedProduct.price).toFixed(2)}
+                      ₹{(quantity * orderModal.selectedProduct.price).toFixed(2)}
                     </strong>
                   </p>
                 )}
@@ -426,14 +427,14 @@ export default function EmployeeOrders() {
           <table className="table mb-0" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead className="table-light">
               <tr style={{ borderBottom: '2px solid #dee2e6' }}>
-                {['#','Product','Category','Price','Qty','Total','Status','Date','Action'].map(h => (
+                {['#','Product','Category','Price','Qty','Total','Status','Distributor','Date','Action'].map(h => (
                   <th key={h} style={{ padding: '14px 16px', fontWeight: 600, fontSize: '14px' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {currentItems.length === 0 ? (
-                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                <tr><td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
                   No orders found.
                 </td></tr>
               ) : currentItems.map((o, i) => {
@@ -443,9 +444,9 @@ export default function EmployeeOrders() {
                     <td style={td}>{indexOfFirstItem + i + 1}</td>
                     <td style={{ ...td, fontWeight: 600 }}>{o.productName}</td>
                     <td style={td}>{o.category}</td>
-                    <td style={td}>${Number(o.price).toFixed(2)}</td>
+                    <td style={td}>₹{Number(o.price).toFixed(2)}</td>
                     <td style={td}>{o.quantity}</td>
-                    <td style={td}>${Number(o.totalPrice).toFixed(2)}</td>
+                    <td style={td}>₹{Number(o.totalPrice).toFixed(2)}</td>
                     <td style={td}>
                       <span style={{
                         background: ss.bg, color: ss.color,
@@ -455,6 +456,7 @@ export default function EmployeeOrders() {
                         {o.status}
                       </span>
                     </td>
+                    <td style={td}>{o.distributor_id?.name || 'Global'}</td>
                     <td style={td}>{new Date(o.createdAt).toLocaleDateString()}</td>
                     <td style={td}>
                       {['Pending', 'Processing'].includes(o.status) ? (

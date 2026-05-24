@@ -330,7 +330,7 @@ export default function Products() {
   const [popup,     setPopup]     = useState({ show: false, message: '' });
   const [sidebarW,  setSidebarW]  = useState(220);
   const [form, setForm] = useState({
-    name: '', category: '', supplier: '', price: '', stock: '', minThreshold: 25
+    name: '', category: '', supplier: 'HP Group', price: '', stock: '', minThreshold: 25
   });
   
   const [categories, setCategories] = useState([]);
@@ -364,7 +364,7 @@ export default function Products() {
 
   const fetchProducts = async (q = '') => {
     try {
-      const res = await axios.get(`${BASE}?search=${q}`);
+      const res = await axios.get(`${BASE}?search=${q}`, { headers });
       setProducts(res.data);
     } catch (err) {
       console.error('Fetch error:', err.message);
@@ -393,6 +393,17 @@ useEffect(() => {
   const onUpdated = (updatedProduct) => {
     console.log('📦 ADMIN received update:', updatedProduct.name, updatedProduct.stock);
     setProducts(prev => {
+      const exists = prev.some(p => p._id === updatedProduct._id);
+      if (!exists) {
+        const loggedInUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+        const distId = updatedProduct.distributor_id && typeof updatedProduct.distributor_id === 'object'
+          ? updatedProduct.distributor_id._id
+          : updatedProduct.distributor_id;
+        if (distId && distId === loggedInUser.id) {
+          return [{ ...updatedProduct }, ...prev];
+        }
+        return prev;
+      }
       const updated = prev.map(p =>
         p._id === updatedProduct._id ? { ...updatedProduct } : p
       );
@@ -428,7 +439,7 @@ useEffect(() => {
 
   const openAddModal = () => {
     setEditId(null);
-    setForm({ name: '', category: '', supplier: '', price: '', stock: '', minThreshold: 25 });
+    setForm({ name: '', category: '', supplier: 'HP Group', price: '', stock: '', minThreshold: 25 });
     setIsNewCategory(false);
     setFormErrors({});
     setShowModal(true);
@@ -439,7 +450,7 @@ useEffect(() => {
     setForm({
       name:     product.name,
       category: product.category,
-      supplier: product.supplier,
+      supplier: product.supplier || 'HP Group',
       price:    product.price,
       stock:    product.stock,
       minThreshold: product.minThreshold || 25,
@@ -452,7 +463,7 @@ useEffect(() => {
   const closeModal = () => {
     setShowModal(false);
     setEditId(null);
-    setForm({ name: '', category: '', supplier: '', price: '', stock: '', minThreshold: 25 });
+    setForm({ name: '', category: '', supplier: 'HP Group', price: '', stock: '', minThreshold: 25 });
     setIsNewCategory(false);
     setFormErrors({});
   };
@@ -464,6 +475,10 @@ useEffect(() => {
     const errors = {};
     if (!form.name.trim()) errors.name = 'Product Name is required';
     if (!form.category.trim()) errors.category = 'Category is required';
+    if (form.price === '' || isNaN(form.price) || Number(form.price) < 0) errors.price = 'Valid price is required';
+    if (form.stock === '' || isNaN(form.stock) || Number(form.stock) < 0) errors.stock = 'Valid stock quantity is required';
+    if (form.minThreshold === '' || isNaN(form.minThreshold) || Number(form.minThreshold) < 0) errors.minThreshold = 'Valid minimum threshold is required';
+    
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -520,6 +535,8 @@ useEffect(() => {
     <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
 
       <Sidebar onWidthChange={setSidebarW} />
+
+
 
       {/* Popup */}
       {popup.show && (
@@ -595,35 +612,40 @@ useEffect(() => {
                 {formErrors.category && <div style={{color:'#dc3545', fontSize:'0.875em', marginTop:'0.25rem'}}>{formErrors.category}</div>}
               </div>
               <div className="mb-3">
-                <label className="form-label fw-semibold">Supplier</label>
-                <input className="form-control" placeholder="e.g. HP Group"
-                  value={form.supplier}
-                  onChange={e => setForm({ ...form, supplier: e.target.value })}
-                  required />
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Price ($)</label>
-                <input className="form-control" type="number" min="0" step="0.01"
+                <label className="form-label fw-semibold">Price (₹) <span className="text-danger">*</span></label>
+                <input className={`form-control ${formErrors.price ? 'border-danger' : ''}`} type="number" min="0" step="0.01"
                   placeholder="e.g. 10.00"
                   value={form.price}
-                  onChange={e => setForm({ ...form, price: e.target.value })}
-                  required />
+                  onChange={e => {
+                    setForm({ ...form, price: e.target.value });
+                    if(e.target.value !== '') setFormErrors(prev => ({...prev, price: ''}));
+                  }}
+                  />
+                {formErrors.price && <div style={{color:'#dc3545', fontSize:'0.875em', marginTop:'0.25rem'}}>{formErrors.price}</div>}
               </div>
               <div className="mb-4">
-                <label className="form-label fw-semibold">Stock Quantity</label>
-                <input className="form-control" type="number" min="0"
+                <label className="form-label fw-semibold">Stock Quantity <span className="text-danger">*</span></label>
+                <input className={`form-control ${formErrors.stock ? 'border-danger' : ''}`} type="number" min="0"
                   placeholder="e.g. 20"
                   value={form.stock}
-                  onChange={e => setForm({ ...form, stock: e.target.value })}
-                  required />
+                  onChange={e => {
+                    setForm({ ...form, stock: e.target.value });
+                    if(e.target.value !== '') setFormErrors(prev => ({...prev, stock: ''}));
+                  }}
+                  />
+                {formErrors.stock && <div style={{color:'#dc3545', fontSize:'0.875em', marginTop:'0.25rem'}}>{formErrors.stock}</div>}
               </div>
               <div className="mb-4">
-                <label className="form-label fw-semibold">Minimum Threshold Value (for stock alert)</label>
-                <input className="form-control" type="number" min="0"
+                <label className="form-label fw-semibold">Minimum Threshold Value (for stock alert) <span className="text-danger">*</span></label>
+                <input className={`form-control ${formErrors.minThreshold ? 'border-danger' : ''}`} type="number" min="0"
                   placeholder="e.g. 25"
                   value={form.minThreshold}
-                  onChange={e => setForm({ ...form, minThreshold: Number(e.target.value) })}
-                  required />
+                  onChange={e => {
+                    setForm({ ...form, minThreshold: e.target.value });
+                    if(e.target.value !== '') setFormErrors(prev => ({...prev, minThreshold: ''}));
+                  }}
+                  />
+                {formErrors.minThreshold && <div style={{color:'#dc3545', fontSize:'0.875em', marginTop:'0.25rem'}}>{formErrors.minThreshold}</div>}
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                 <button type="button" className="btn btn-secondary"
@@ -689,7 +711,7 @@ useEffect(() => {
             style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #dee2e6' }}>
-                {['Name','Category','Supplier','Price','Stock','Action'].map(h => (
+                {['Name','Category','Price','Stock','Action'].map(h => (
                   <th key={h} style={S.th}>{h}</th>
                 ))}
               </tr>
@@ -697,7 +719,7 @@ useEffect(() => {
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
                     No products found. Click <strong>+ Add Product</strong> to get started.
                   </td>
                 </tr>
@@ -705,8 +727,7 @@ useEffect(() => {
                 <tr key={p._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                   <td style={S.td}>{p.name}</td>
                   <td style={S.td}>{p.category}</td>
-                  <td style={S.td}>{p.supplier}</td>
-                  <td style={S.td}>${Number(p.price).toFixed(2)}</td>
+                  <td style={S.td}>₹{Number(p.price).toFixed(2)}</td>
                   <td style={S.td}>
                     <span style={{
                       ...stockColor(p.stock, p.minThreshold),

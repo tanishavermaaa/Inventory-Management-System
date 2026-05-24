@@ -26,6 +26,10 @@ const supplierSchema = new mongoose.Schema({
     enum: ['Active', 'Inactive'],
     default: 'Active',
   },
+  distributor_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Supplier', supplierSchema);

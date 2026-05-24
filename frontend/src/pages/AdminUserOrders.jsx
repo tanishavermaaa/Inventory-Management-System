@@ -5,16 +5,69 @@ import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import socket from '../socket';
 
-export default function AdminOrders() {
+export default function AdminUserOrders() {
   const [orders,       setOrders]       = useState([]);
   const [search,       setSearch]       = useState('');
   const [notifCount,   setNotifCount]   = useState(0);
   const [sidebarW,     setSidebarW]     = useState(220);
   const { toast, showToast, hideToast } = useToast();
 
-  const restockOrdersOnly = orders.filter(o => o.orderedBy && o.orderedBy.role === 'admin');
+  const loggedInUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+  const token   = sessionStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}` };
 
-  const filteredOrders = restockOrdersOnly.filter(o =>
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get('http://localhost:5001/api/orders/all', { headers });
+      setOrders(res.data);
+    } catch (err) {
+      showToast('Failed to load orders', 'error');
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+
+    // Real-time new order notification
+    const onNewOrder = (data) => {
+      // Check if this order is for this admin
+      if (data.distributor_id && data.distributor_id !== loggedInUser.id) {
+        return; // Skip notification for other admins
+      }
+      showToast(`🛒 ${data.message} — ${data.productName} (x${data.quantity})`, 'info');
+      setNotifCount(c => c + 1);
+      fetchOrders(); // refresh orders list
+    };
+
+    const onOrderUpdated = (updatedOrder) => {
+      setOrders(prev => prev.map(o => o._id === updatedOrder._id ? updatedOrder : o));
+    };
+
+    socket.off('order:new');
+    socket.on('order:new', onNewOrder);
+    socket.on('order:updated', onOrderUpdated);
+
+    return () => {
+      socket.off('order:new', onNewOrder);
+      socket.off('order:updated', onOrderUpdated);
+    };
+  }, []);
+
+  const updateStatus = async (id, status) => {
+    try {
+      await axios.put(`http://localhost:5001/api/orders/${id}/status`,
+        { status }, { headers });
+      showToast(`Order ${status}!`, 'success');
+      fetchOrders();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed', 'error');
+    }
+  };
+
+  // Filter only orders placed by employees (role !== 'admin')
+  const userOrdersOnly = orders.filter(o => o.orderedBy && o.orderedBy.role !== 'admin');
+
+  const filteredOrders = userOrdersOnly.filter(o =>
     o.productName.toLowerCase().includes(search.toLowerCase()) ||
     (o.orderedByName && o.orderedByName.toLowerCase().includes(search.toLowerCase())) ||
     (o.category && o.category.toLowerCase().includes(search.toLowerCase()))
@@ -39,42 +92,6 @@ export default function AdminOrders() {
     }
   }, [orders, totalPages]);
 
-  const token   = sessionStorage.getItem('token');
-  const headers = { Authorization: `Bearer ${token}` };
-
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/orders/all', { headers });
-      setOrders(res.data);
-    } catch (err) {
-      showToast('Failed to load orders', 'error');
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-
-    // Real-time new order notification
-    const onNewOrder = (data) => {
-      showToast(`🛒 ${data.message} — ${data.productName} (x${data.quantity})`, 'info');
-      setNotifCount(c => c + 1);
-      fetchOrders(); // refresh orders list
-    };
-
-    const onOrderUpdated = (updatedOrder) => {
-      setOrders(prev => prev.map(o => o._id === updatedOrder._id ? updatedOrder : o));
-    };
-
-    socket.off('order:new');
-    socket.on('order:new', onNewOrder);
-    socket.on('order:updated', onOrderUpdated);
-
-    return () => {
-      socket.off('order:new', onNewOrder);
-      socket.off('order:updated', onOrderUpdated);
-    };
-  }, []);
-
   const statusColor = (s) => ({
     Pending:   { bg: '#fef3c7', color: '#92400e' },
     Approved:  { bg: '#d1fae5', color: '#065f46' },
@@ -82,18 +99,7 @@ export default function AdminOrders() {
     Cancelled: { bg: '#f3f4f6', color: '#374151' },
   }[s] || { bg: '#f3f4f6', color: '#374151' });
 
-  const updateStatus = async (id, status) => {
-    try {
-      await axios.put(`http://localhost:5001/api/orders/${id}/status`,
-        { status }, { headers });
-      showToast(`Order ${status}!`, 'success');
-      fetchOrders();
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed', 'error');
-    }
-  };
-
-
+  const td = { padding: '14px 16px', fontSize: '14px', verticalAlign: 'middle' };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
@@ -108,7 +114,7 @@ export default function AdminOrders() {
         <div style={{ display: 'flex', alignItems: 'center',
                       justifyContent: 'space-between', marginBottom: '24px' }}>
           <h4 style={{ fontWeight: 700, fontSize: '26px', margin: 0 }}>
-            Order Management (Supplier Restocks)
+            User Orders Management
           </h4>
           {notifCount > 0 && (
             <div style={{
@@ -126,7 +132,7 @@ export default function AdminOrders() {
           <input
             className="form-control"
             style={{ flex: 1, minWidth: '180px', padding: '10px 16px', fontSize: '14px' }}
-            placeholder="Search restock orders by product or category..."
+            placeholder="Search user orders by product, category, or employee..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -139,43 +145,43 @@ export default function AdminOrders() {
           <table className="table mb-0" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead className="table-light">
               <tr style={{ borderBottom: '2px solid #dee2e6' }}>
-                {['S.No','Product','Qty','Total','Status','Date','Status Details'].map(h => (
+                {['S.No','Product','Employee','Qty','Total','Status','Date','Actions'].map(h => (
                   <th key={h} style={{ padding: '14px 16px', fontWeight: 600, fontSize: '14px' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {currentItems.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
-                  No restock orders yet.
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                  No user orders yet.
                 </td></tr>
               ) : currentItems.map((o, i) => {
-                const sc = statusColor(o.status);
+                const ss = statusColor(o.status);
                 return (
                   <tr key={o._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                     <td style={td}>{indexOfFirstItem + i + 1}</td>
-                    <td style={td}><div style={{ fontWeight: 600 }}>{o.productName}</div></td>
+                    <td style={{ ...td, fontWeight: 600 }}>{o.productName}</td>
+                    <td style={td}>{o.orderedByName || 'Employee'}</td>
                     <td style={td}>{o.quantity}</td>
-                    <td style={td}>₹{o.totalPrice.toFixed(2)}</td>
+                    <td style={td}>₹{Number(o.totalPrice).toFixed(2)}</td>
                     <td style={td}>
                       <span style={{
-                        background: sc.bg, color: sc.color,
+                        background: ss.bg, color: ss.color,
                         padding: '4px 12px', borderRadius: '12px',
-                        fontSize: '12px', fontWeight: 600,
-                      }}>
-                        {o.status}
-                      </span>
+                        fontSize: '12px', fontWeight: 600
+                      }}>{o.status}</span>
                     </td>
                     <td style={td}>{new Date(o.createdAt).toLocaleDateString()}</td>
                     <td style={td}>
                       {o.status === 'Pending' ? (
-                        <span style={{ color: '#cca876', fontSize: '13px', fontWeight: 600 }}>Awaiting Supplier Approval</span>
-                      ) : o.status === 'Approved' ? (
-                        <span style={{ color: '#065f46', fontSize: '13px', fontWeight: 600 }}>Approved by Supplier</span>
-                      ) : o.status === 'Rejected' ? (
-                        <span style={{ color: '#991b1b', fontSize: '13px', fontWeight: 600 }}>Rejected by Supplier</span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button className="btn btn-success btn-sm"
+                            onClick={() => updateStatus(o._id, 'Approved')}>Approve</button>
+                          <button className="btn btn-danger btn-sm"
+                            onClick={() => updateStatus(o._id, 'Rejected')}>Reject</button>
+                        </div>
                       ) : (
-                        <span style={{ color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Cancelled</span>
+                        <span style={{ color: '#aaa', fontSize: '13px' }}>—</span>
                       )}
                     </td>
                   </tr>
@@ -184,36 +190,18 @@ export default function AdminOrders() {
             </tbody>
           </table>
 
-          {orders.length > 0 && (
+          {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '20px', paddingBottom: '10px' }}>
               <button 
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #ddd',
-                  background: currentPage === 1 ? '#f5f5f5' : '#fff',
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  color: currentPage === 1 ? '#aaa' : '#333',
-                  fontWeight: '600',
-                  transition: 'all 0.2s'
-                }}
+                className="btn btn-outline-secondary btn-sm"
               >&laquo;</button>
               {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(num => (
                 <button
                   key={num}
                   onClick={() => setCurrentPage(num)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    border: num === currentPage ? '1px solid #4CAF50' : '1px solid #ddd',
-                    background: num === currentPage ? '#4CAF50' : '#fff',
-                    color: num === currentPage ? '#fff' : '#333',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
+                  className={`btn btn-sm ${num === currentPage ? 'btn-primary' : 'btn-outline-secondary'}`}
                 >
                   {num}
                 </button>
@@ -221,16 +209,7 @@ export default function AdminOrders() {
               <button 
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #ddd',
-                  background: currentPage === totalPages ? '#f5f5f5' : '#fff',
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  color: currentPage === totalPages ? '#aaa' : '#333',
-                  fontWeight: '600',
-                  transition: 'all 0.2s'
-                }}
+                className="btn btn-outline-secondary btn-sm"
               >&raquo;</button>
             </div>
           )}
@@ -239,5 +218,3 @@ export default function AdminOrders() {
     </div>
   );
 }
-
-const td = { padding: '14px 16px', fontSize: '14px', verticalAlign: 'middle' };

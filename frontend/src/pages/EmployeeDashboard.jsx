@@ -47,7 +47,7 @@ export default function EmployeeDashboard() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${PROD_URL}?search=${search}`);
+      const res = await axios.get(`${PROD_URL}?search=${search}`, { headers });
       let data = res.data;
       if (selCat) data = data.filter(p => p.category === selCat);
       setProducts(data);
@@ -155,10 +155,11 @@ export default function EmployeeDashboard() {
             <table style={{ width: '100%', marginBottom: '20px', fontSize: '14px' }}>
               <tbody>
                 {[
-                  ['Product',  orderModal.product.name],
-                  ['Category', orderModal.product.category],
-                  ['Price',    `$${Number(orderModal.product.price).toFixed(2)}`],
-                  ['In Stock', orderModal.product.stock],
+                  ['Product',     orderModal.product.name],
+                  ['Category',    orderModal.product.category],
+                  ['Price',       `₹${Number(orderModal.product.price).toFixed(2)}`],
+                  ['In Stock',    orderModal.product.stock],
+                  ['Distributor', orderModal.product.distributor_id?.name || 'Global'],
                 ].map(([k, v]) => (
                   <tr key={k}>
                     <td style={{ color: '#888', paddingBottom: '10px', width: '90px' }}>{k}</td>
@@ -196,7 +197,7 @@ export default function EmployeeDashboard() {
             {!qtyError && quantity >= 1 && (
               <p style={{ fontSize: '14px', color: '#555', marginBottom: '20px' }}>
                 Total: <strong style={{ color: '#198754', fontSize: '16px' }}>
-                  ${(quantity * orderModal.product.price).toFixed(2)}
+                  ₹{(quantity * orderModal.product.price).toFixed(2)}
                 </strong>
               </p>
             )}
@@ -270,7 +271,7 @@ export default function EmployeeDashboard() {
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
                     No products available.
                   </td>
                 </tr>
@@ -279,7 +280,7 @@ export default function EmployeeDashboard() {
                   <td style={S.td}>{indexOfFirstItem + i + 1}</td>
                   <td style={S.td}>{p.name}</td>
                   <td style={S.td}>{p.category}</td>
-                  <td style={S.td}>${Number(p.price).toFixed(2)}</td>
+                  <td style={S.td}>₹{Number(p.price).toFixed(2)}</td>
                   <td style={S.td}>
                     <span style={{
                       background: p.stock === 0 ? '#dc3545'
@@ -293,6 +294,7 @@ export default function EmployeeDashboard() {
                       {p.stock}
                     </span>
                   </td>
+                  {/* <td style={S.td}>{p.distributor_id?.name || 'Global'}</td> */}
                   <td style={S.td}>
                     <button onClick={() => openOrder(p)} style={{
                       background: p.stock === 0 ? '#adb5bd' : '#198754',

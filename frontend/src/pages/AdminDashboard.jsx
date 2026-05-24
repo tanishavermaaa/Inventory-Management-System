@@ -54,12 +54,16 @@ export default function AdminDashboard() {
   const totalSuppliers = data.suppliers.length;
   const totalOrders = data.orders.length;
 
+  // Filter orders by role
+  const userOrders = data.orders.filter(o => o.orderedBy && o.orderedBy.role !== 'admin');
+  const supplierRestocks = data.orders.filter(o => o.orderedBy && o.orderedBy.role === 'admin');
+
   // For the '↑ X this month' we don't have historical data, so we can mock the trend logic or calculate if timestamps exist.
   // To strictly follow the mockup, I'll display hardcoded or calculated trend text.
   
-  // Order Overview (Donut Chart)
-  const approvedOrders = data.orders.filter(o => o.status === 'Approved').length;
-  const pendingOrders = data.orders.filter(o => ['Pending', 'Processing'].includes(o.status)).length;
+  // Order Overview (Donut Chart) for Employee/User Orders
+  const approvedOrders = userOrders.filter(o => o.status === 'Approved').length;
+  const pendingOrders = userOrders.filter(o => ['Pending', 'Processing'].includes(o.status)).length;
   
   const orderPieData = [
     { name: 'Approved', value: approvedOrders, fill: '#34d399' }, // Green
@@ -81,9 +85,15 @@ export default function AdminDashboard() {
   // Stock Overview (Bar Chart)
   let inStock = 0, lowStock = 0, outOfStock = 0;
   data.products.forEach(p => {
-    if (p.stock === 0) outOfStock++;
-    else if (p.stock < 10) lowStock++;
-    else inStock++;
+    const stock = Number(p.stock !== undefined && p.stock !== null ? p.stock : 0);
+    const threshold = Number(p.minThreshold !== undefined && p.minThreshold !== null ? p.minThreshold : 25);
+    if (stock === 0) {
+      outOfStock++;
+    } else if (stock <= threshold) {
+      lowStock++;
+    } else {
+      inStock++;
+    }
   });
   
   const stockOverviewData = [
@@ -127,7 +137,7 @@ export default function AdminDashboard() {
 
   // CSV Export Utility
   const downloadCSV = (dataList, filename) => {
-    const headers = ['S.No', 'Product Name', 'Ordered By', 'Quantity', 'Total Price ($)', 'Status', 'Date'];
+    const headers = ['S.No', 'Product Name', 'Ordered By', 'Quantity', 'Total Price (₹)', 'Status', 'Date'];
     const rows = dataList.map((order, idx) => [
       idx + 1,
       `"${(order.productName || '').replace(/"/g, '""')}"`,
@@ -179,7 +189,7 @@ export default function AdminDashboard() {
           <div class="meta">
             <strong>Date Generated:</strong> ${new Date().toLocaleString()}<br/>
             <strong>Total Orders:</strong> ${dataList.length}<br/>
-            <strong>Total Revenue:</strong> $${dataList.reduce((sum, o) => sum + o.totalPrice, 0).toFixed(2)}
+            <strong>Total Revenue:</strong> ₹${dataList.reduce((sum, o) => sum + o.totalPrice, 0).toFixed(2)}
           </div>
           <table>
             <thead>
@@ -200,7 +210,7 @@ export default function AdminDashboard() {
                   <td><strong>${order.productName}</strong></td>
                   <td>${order.orderedByName || ''}</td>
                   <td>${order.quantity}</td>
-                  <td>$${order.totalPrice.toFixed(2)}</td>
+                  <td>₹${order.totalPrice.toFixed(2)}</td>
                   <td>
                     <span class="status status-${order.status.toLowerCase()}">${order.status}</span>
                   </td>
@@ -229,7 +239,8 @@ export default function AdminDashboard() {
 
   const getDailyOrders = () => {
     const today = new Date().toDateString();
-    return data.orders.filter(o => new Date(o.createdAt).toDateString() === today);
+    const userOrdersList = data.orders.filter(o => o.orderedBy && o.orderedBy.role !== 'admin');
+    return userOrdersList.filter(o => new Date(o.createdAt).toDateString() === today);
   };
 
   const exportDailyCSV = () => {
@@ -243,11 +254,13 @@ export default function AdminDashboard() {
   };
 
   const exportAllCSV = () => {
-    downloadCSV(data.orders, `all_orders_${new Date().toISOString().split('T')[0]}.csv`);
+    const userOrdersList = data.orders.filter(o => o.orderedBy && o.orderedBy.role !== 'admin');
+    downloadCSV(userOrdersList, `all_orders_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const exportAllPDF = () => {
-    downloadPDF(data.orders, `All Orders Report - ${new Date().toLocaleDateString()}`);
+    const userOrdersList = data.orders.filter(o => o.orderedBy && o.orderedBy.role !== 'admin');
+    downloadPDF(userOrdersList, `All Orders Report - ${new Date().toLocaleDateString()}`);
   };
 
   return (
@@ -362,8 +375,8 @@ export default function AdminDashboard() {
             <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', flexWrap: 'wrap' }}>
               <SummaryCard title="Categories" count={totalCategories} trend={3} icon="📁" path="/admin-dashboard/categories" />
               <SummaryCard title="Products" count={totalProducts} trend={12} icon="📦" path="/admin-dashboard/products" />
-              <SummaryCard title="Suppliers" count={totalSuppliers} trend={2} icon="🚚" path="/admin-dashboard/suppliers" />
-              <SummaryCard title="Orders" count={totalOrders} trend={8} icon="🛒" path="/admin-dashboard/orders" />
+              <SummaryCard title="Supplier Restocks" count={supplierRestocks.length} trend={2} icon="🚚" path="/admin-dashboard/orders" />
+              <SummaryCard title="User Orders" count={userOrders.length} trend={8} icon="🛒" path="/admin-dashboard/user-orders" />
             </div>
 
             {/* Charts Row */}
@@ -394,7 +407,7 @@ export default function AdminDashboard() {
                     </ResponsiveContainer>
                     {/* Center Text */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ fontSize: '28px', fontWeight: 800, color: '#111827' }}>{totalOrders}</div>
+                      <div style={{ fontSize: '28px', fontWeight: 800, color: '#111827' }}>{userOrders.length}</div>
                       <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Total Orders</div>
                     </div>
                   </div>
@@ -406,7 +419,7 @@ export default function AdminDashboard() {
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Approved</div>
                         <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                          {approvedOrders} ({totalOrders ? ((approvedOrders/totalOrders)*100).toFixed(2) : 0}%)
+                          {approvedOrders} ({userOrders.length ? ((approvedOrders/userOrders.length)*100).toFixed(2) : 0}%)
                         </div>
                       </div>
                     </div>
@@ -415,7 +428,7 @@ export default function AdminDashboard() {
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Pending</div>
                         <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                          {pendingOrders} ({totalOrders ? ((pendingOrders/totalOrders)*100).toFixed(2) : 0}%)
+                          {pendingOrders} ({userOrders.length ? ((pendingOrders/userOrders.length)*100).toFixed(2) : 0}%)
                         </div>
                       </div>
                     </div>

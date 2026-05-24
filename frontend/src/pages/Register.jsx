@@ -191,6 +191,25 @@ export default function Register() {
               {fieldErrors.confirmPassword && <span style={{ color: '#ef4444', fontSize: '12px', marginTop: '6px', display: 'block' }}>{fieldErrors.confirmPassword}</span>}
             </div>
 
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Select Role</label>
+              <select name="role" value={form.role} onChange={handleChange}
+                style={{
+                  width: '100%', padding: '12px 16px',
+                  border: '1px solid #d1d5db', borderRadius: '8px',
+                  fontSize: '15px', color: '#111827',
+                  outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box',
+                  background: '#fff'
+                }}
+                onFocus={e => (e.target.style.borderColor = '#22c55e')}
+                onBlur={e => (e.target.style.borderColor = '#d1d5db')}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="supplier">Supplier</option>
+              </select>
+            </div>
+
             <button type="submit" disabled={loading} style={{
               background: loading ? '#9ca3af' : '#22c55e', color: '#fff', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '8px', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 4px 12px rgba(34,197,94,0.3)'
             }} onMouseOver={e => !loading && (e.target.style.background = '#16a34a')} onMouseOut={e => !loading && (e.target.style.background = '#22c55e')}>

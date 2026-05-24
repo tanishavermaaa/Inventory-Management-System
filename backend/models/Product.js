@@ -7,6 +7,8 @@ const productSchema = new mongoose.Schema({
   price:        { type: Number, required: true },
   stock:        { type: Number, required: true, default: 0 },
   minThreshold: { type: Number, required: true, default: 25 },
+  addedBySupplier: { type: Boolean, default: false },
+  distributor_id:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { 
   timestamps: true,
   toJSON: { virtuals: true }, 

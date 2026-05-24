@@ -14,11 +14,11 @@
 const express = require('express');
 const router  = express.Router();
 const { getProducts, addProduct, updateProduct, deleteProduct } = require('../controllers/productController');
-const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware, supplierOrAdminMiddleware } = require('../middleware/authMiddleware');
 
-router.get('/',       getProducts);
-router.post('/add',   authMiddleware, adminMiddleware, addProduct);
-router.put('/:id',    authMiddleware, adminMiddleware, updateProduct);
-router.delete('/:id', authMiddleware, adminMiddleware, deleteProduct);
+router.get('/',       authMiddleware, getProducts);
+router.post('/add',   authMiddleware, supplierOrAdminMiddleware, addProduct);
+router.put('/:id',    authMiddleware, supplierOrAdminMiddleware, updateProduct);
+router.delete('/:id', authMiddleware, supplierOrAdminMiddleware, deleteProduct);
 
 module.exports = router;

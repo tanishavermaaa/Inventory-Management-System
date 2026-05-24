@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import EmployeeSidebar from '../components/EmployeeSidebar';
+import SupplierSidebar from '../components/SupplierSidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import { FaUserEdit, FaSave, FaTimes } from 'react-icons/fa';
@@ -104,8 +105,10 @@ export default function Profile() {
       color: 'var(--text-primary)',
       display: 'flex',
     }}>
-      {isAdmin ? (
+      {me.role === 'admin' ? (
         <Sidebar onWidthChange={setSidebarW} />
+      ) : me.role === 'supplier' ? (
+        <SupplierSidebar onWidthChange={setSidebarW} />
       ) : (
         <EmployeeSidebar onWidthChange={setSidebarW} />
       )}

@@ -54,4 +54,18 @@ const adminMiddleware = (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminMiddleware };
+const supplierMiddleware = (req, res, next) => {
+  if (req.user?.role !== 'supplier') {
+    return res.status(403).json({ message: 'Supplier access required' });
+  }
+  next();
+};
+
+const supplierOrAdminMiddleware = (req, res, next) => {
+  if (req.user?.role !== 'admin' && req.user?.role !== 'supplier') {
+    return res.status(403).json({ message: 'Admin or Supplier access required' });
+  }
+  next();
+};
+
+module.exports = { authMiddleware, adminMiddleware, supplierMiddleware, supplierOrAdminMiddleware };

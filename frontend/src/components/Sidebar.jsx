@@ -25,19 +25,9 @@ export default function Sidebar({ onWidthChange }) {
 
   const { toast, showToast, hideToast } = useToast();
 
-  const logout = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/auth/admin-count');
-      if (res.data.count <= 1) {
-        showToast('🚫 Cannot logout: You are the sole administrator. Designate another admin first.', 'error');
-        return;
-      }
-      sessionStorage.clear();
-      navigate('/login');
-    } catch {
-      sessionStorage.clear();
-      navigate('/login');
-    }
+  const logout = () => {
+    sessionStorage.clear();
+    navigate('/login');
   };
 
   const toggleCollapsed = () => {
@@ -87,13 +77,13 @@ export default function Sidebar({ onWidthChange }) {
   }, [isDragging]);
 
   const links = [
-    { to: '/admin-dashboard',            icon: <FaTachometerAlt />, label: 'Dashboard'  },
-    { to: '/admin-dashboard/categories', icon: <FaThLarge />,       label: 'Categories' },
-    { to: '/admin-dashboard/products',   icon: <FaBoxes />,         label: 'Products'   },
-    { to: '/admin-dashboard/suppliers',  icon: <FaTruck />,         label: 'Suppliers'  },
-    { to: '/admin-dashboard/orders',     icon: <FaShoppingCart />,  label: 'Orders'     },
-    { to: '/admin-dashboard/users',      icon: <FaUsers />,         label: 'Users'      },
-    { to: '/admin-dashboard/profile',    icon: <FaUserCircle />,    label: 'Profile'    },
+    { to: '/admin-dashboard',            icon: <FaTachometerAlt />, label: 'Dashboard'   },
+    { to: '/admin-dashboard/categories', icon: <FaThLarge />,       label: 'Categories'  },
+    { to: '/admin-dashboard/products',   icon: <FaBoxes />,         label: 'Products'    },
+    { to: '/admin-dashboard/suppliers',  icon: <FaTruck />,         label: 'Suppliers'   },
+    { to: '/admin-dashboard/orders',     icon: <FaShoppingCart />,  label: 'Orders'      },
+    { to: '/admin-dashboard/user-orders',icon: <FaUsers />,         label: 'User Orders' },
+    { to: '/admin-dashboard/profile',    icon: <FaUserCircle />,    label: 'Profile'     },
   ];
 
   const w = collapsed ? collapsedWidth : width;

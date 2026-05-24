@@ -84,7 +84,21 @@ io.on('connection', (socket) => {
 });
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
+  .then(async () => {
+    console.log('✅ MongoDB Connected');
+    try {
+      const User = require('./models/User');
+      const Product = require('./models/Product');
+      const suppliers = await User.find({ role: 'supplier' });
+      const names = suppliers.map(s => s.name);
+      await Product.updateMany(
+        { supplier: { $in: names }, addedBySupplier: { $ne: true } },
+        { $set: { addedBySupplier: true } }
+      );
+    } catch (migErr) {
+      console.error('Startup migration error:', migErr);
+    }
+  })
   .catch(err => console.error('❌ DB Error:', err));
 
 const PORT = process.env.PORT || 5000;

@@ -9,6 +9,10 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  distributor_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', categorySchema);

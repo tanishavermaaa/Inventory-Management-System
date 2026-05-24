@@ -42,12 +42,14 @@ import Register          from './pages/Register';
 import AdminDashboard    from './pages/AdminDashboard';
 import Categories        from './pages/Categories';
 import Products          from './pages/Products';
-import Users             from './pages/Users';
 import AdminOrders       from './pages/AdminOrders';
+import AdminUserOrders   from './pages/AdminUserOrders';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import EmployeeOrders    from './pages/EmployeeOrders';
 import Profile           from './pages/Profile';
 import Suppliers         from './pages/Suppliers';
+import SupplierDashboard from './pages/SupplierDashboard';
+import SupplierOrders    from './pages/SupplierOrders';
 
 const AdminRoute = ({ children }) => {
   const token = sessionStorage.getItem('token');
@@ -59,6 +61,12 @@ const EmployeeRoute = ({ children }) => {
   const token = sessionStorage.getItem('token');
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   return token && user.role === 'user' ? children : <Navigate to="/login" replace />;
+};
+
+const SupplierRoute = ({ children }) => {
+  const token = sessionStorage.getItem('token');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+  return token && user.role === 'supplier' ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -73,13 +81,17 @@ function App() {
         <Route path="/admin-dashboard/categories" element={<AdminRoute><Categories /></AdminRoute>} />
         <Route path="/admin-dashboard/products"   element={<AdminRoute><Products /></AdminRoute>} />
         <Route path="/admin-dashboard/suppliers"  element={<AdminRoute><Suppliers /></AdminRoute>} />
-        <Route path="/admin-dashboard/users"      element={<AdminRoute><Users /></AdminRoute>} />
         <Route path="/admin-dashboard/orders"     element={<AdminRoute><AdminOrders /></AdminRoute>} />
+        <Route path="/admin-dashboard/user-orders" element={<AdminRoute><AdminUserOrders /></AdminRoute>} />
         <Route path="/admin-dashboard/profile"    element={<AdminRoute><Profile /></AdminRoute>} />
 
         <Route path="/employee-dashboard"         element={<EmployeeRoute><EmployeeDashboard /></EmployeeRoute>} />
         <Route path="/employee-dashboard/orders"  element={<EmployeeRoute><EmployeeOrders /></EmployeeRoute>} />
         <Route path="/employee-dashboard/profile" element={<EmployeeRoute><Profile /></EmployeeRoute>} />
+
+        <Route path="/supplier-dashboard"         element={<SupplierRoute><SupplierDashboard /></SupplierRoute>} />
+        <Route path="/supplier-dashboard/orders"  element={<SupplierRoute><SupplierOrders /></SupplierRoute>} />
+        <Route path="/supplier-dashboard/profile" element={<SupplierRoute><Profile /></SupplierRoute>} />
       </Routes>
     </BrowserRouter>
   );

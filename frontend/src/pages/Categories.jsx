@@ -21,7 +21,7 @@ export default function Categories() {
 
   const filteredCategories = categories.filter(c =>
     c.categoryName.toLowerCase().includes(search.toLowerCase()) ||
-    c.categoryDescription.toLowerCase().includes(search.toLowerCase())
+    (c.productNames && c.productNames.some(pName => pName.toLowerCase().includes(search.toLowerCase())))
   );
 
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
@@ -42,10 +42,13 @@ export default function Categories() {
   const showPopup  = (msg) => setPopup({ show: true,  message: msg });
   const closePopup = ()    => setPopup({ show: false, message: '' });
 
+  const token = sessionStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}` };
+
   /* ── fetch all categories ── */
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(BASE);
+      const res = await axios.get(BASE, { headers });
       setCategories(res.data);
     } catch (err) {
       console.error('Fetch error:', err.message);
@@ -58,14 +61,11 @@ export default function Categories() {
 
   useEffect(() => {
     socket.on('category:added', (newCat) => {
-      setCategories(prev => {
-        if (prev.some(c => c._id === newCat._id)) return prev;
-        return [newCat, ...prev];
-      });
+      fetchCategories(); // Refresh fully to get product mappings correctly
     });
 
     socket.on('category:updated', (updatedCat) => {
-      setCategories(prev => prev.map(c => c._id === updatedCat._id ? updatedCat : c));
+      fetchCategories();
     });
 
     socket.on('category:deleted', ({ _id }) => {
@@ -87,7 +87,7 @@ export default function Categories() {
       await axios.put(`${BASE}/${editId}`, {
         categoryName,
         categoryDescription: categoryDesc,
-      });
+      }, { headers });
       showPopup('Category Updated Successfully!');
       setCategoryName('');
       setCategoryDesc('');
@@ -103,7 +103,7 @@ export default function Categories() {
   const handleEdit = (cat) => {
     setEditId(cat._id);
     setCategoryName(cat.categoryName);
-    setCategoryDesc(cat.categoryDescription);
+    setCategoryDesc(cat.categoryDescription || '');
   };
 
   const handleCancel = () => {
@@ -116,7 +116,7 @@ export default function Categories() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this category?')) return;
     try {
-      await axios.delete(`${BASE}/${id}`);
+      await axios.delete(`${BASE}/${id}`, { headers });
       showPopup('Category Deleted Successfully!');
       fetchCategories();
     } catch (err) {
@@ -209,7 +209,7 @@ export default function Categories() {
           <input
             className="form-control"
             style={{ flex: 1, padding: '10px 16px', fontSize: '14px' }}
-            placeholder="Search categories by name or description..."
+            placeholder="Search categories by category name or product name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -228,7 +228,7 @@ export default function Categories() {
               <tr style={{ borderBottom: '2px solid #dee2e6' }}>
                 <th style={{ ...styles.th, width: '80px' }}>S No</th>
                 <th style={styles.th}>Category Name</th>
-                <th style={styles.th}>Description</th>
+                <th style={styles.th}>Product Names</th>
                 <th style={{ ...styles.th, width: '180px' }}>Action</th>
               </tr>
             </thead>
@@ -244,7 +244,21 @@ export default function Categories() {
                   <tr key={cat._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                     <td style={styles.td}>{indexOfFirstItem + i + 1}</td>
                     <td style={{ ...styles.td, fontWeight: 600 }}>{cat.categoryName}</td>
-                    <td style={styles.td}>{cat.categoryDescription}</td>
+                    <td style={styles.td}>
+                      {cat.productNames && cat.productNames.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {cat.productNames.map((name, idx) => (
+                            <span key={idx} style={{
+                              background: '#e9ecef', color: '#495057',
+                              padding: '2px 8px', borderRadius: '4px',
+                              fontSize: '13px', fontWeight: 500
+                            }}>{name}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ color: '#aaa', fontStyle: 'italic' }}>No Products</span>
+                      )}
+                    </td>
                     <td style={styles.td}>
                       <button style={{ background: 'none', border: 'none', color: '#0d6efd', fontWeight: 600, cursor: 'pointer', marginRight: '12px' }} onClick={() => handleEdit(cat)}>
                         Edit

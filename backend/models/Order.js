@@ -28,7 +28,11 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     default: 'Pending',
-    enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],  // ← Added Cancelled
+    enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
+  },
+  distributor_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   },
 }, { timestamps: true });
 
