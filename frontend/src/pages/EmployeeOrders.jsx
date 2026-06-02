@@ -129,6 +129,7 @@ import EmployeeSidebar from '../components/EmployeeSidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
 export default function EmployeeOrders() {
   const [orders,   setOrders]   = useState([]);
@@ -149,7 +150,7 @@ export default function EmployeeOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/orders/mine', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/orders/mine`, { headers });
       setOrders(res.data);
     } catch (err) {
       const code = err.response?.data?.code;
@@ -162,7 +163,7 @@ export default function EmployeeOrders() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/products', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/products`, { headers });
       // Only show products with stock available
       setProducts(res.data.filter(p => p.stock > 0));
     } catch (err) {
@@ -237,7 +238,7 @@ export default function EmployeeOrders() {
     }
     setOrderLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/orders/place',
+      await axios.post(`${API_BASE_URL}/api/orders/place`,
         { productId: prod._id, quantity },
         { headers }
       );
@@ -254,7 +255,7 @@ export default function EmployeeOrders() {
     if (!window.confirm('Cancel this order?')) return;
     try {
       const res = await axios.put(
-        `http://localhost:5001/api/orders/${id}/cancel`, {}, { headers }
+        `${API_BASE_URL}/api/orders/${id}/cancel`, {}, { headers }
       );
       showToast(res.data.message, 'success');
       fetchOrders();

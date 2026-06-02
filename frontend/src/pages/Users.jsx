@@ -3,6 +3,7 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
+import { API_BASE_URL } from '../config';
 
 export default function Users() {
   const [users,    setUsers]    = useState([]);
@@ -33,7 +34,7 @@ export default function Users() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/users', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/users`, { headers });
       setUsers(res.data);
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to load users', 'error');
@@ -45,7 +46,7 @@ export default function Users() {
   const makeAdmin = async (id, name) => {
     if (!window.confirm(`Make ${name} an admin?`)) return;
     try {
-      const res = await axios.put(`http://localhost:5001/api/users/${id}/make-admin`, {}, { headers });
+      const res = await axios.put(`${API_BASE_URL}/api/users/${id}/make-admin`, {}, { headers });
       showToast(res.data.message, 'success');
       fetchUsers();
     } catch (err) {
@@ -56,7 +57,7 @@ export default function Users() {
   const removeAdmin = async (id, name) => {
     if (!window.confirm(`Remove admin role from ${name}?`)) return;
     try {
-      const res = await axios.put(`http://localhost:5001/api/users/${id}/remove-admin`, {}, { headers });
+      const res = await axios.put(`${API_BASE_URL}/api/users/${id}/remove-admin`, {}, { headers });
       showToast(res.data.message, 'success');
       fetchUsers();
     } catch (err) {
@@ -67,7 +68,7 @@ export default function Users() {
   const deleteUser = async (id, name) => {
     if (!window.confirm(`Delete ${name}? This cannot be undone.`)) return;
     try {
-      const res = await axios.delete(`http://localhost:5001/api/users/${id}`, { headers });
+      const res = await axios.delete(`${API_BASE_URL}/api/users/${id}`, { headers });
       showToast(res.data.message, 'success');
       fetchUsers();
     } catch (err) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import EmployeeSidebar from '../components/EmployeeSidebar';
+import { API_BASE_URL } from '../config';
 import SupplierSidebar from '../components/SupplierSidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
@@ -30,7 +31,7 @@ export default function Profile() {
   // Fetch full user profile details from backend
   const fetchProfile = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/users/profile', {
+      const res = await axios.get(`${API_BASE_URL}/api/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfileData(res.data);
@@ -52,7 +53,7 @@ export default function Profile() {
     setEditLoading(true);
     try {
       const res = await axios.put(
-        'http://localhost:5001/api/users/profile',
+        `${API_BASE_URL}/api/users/profile`,
         editForm,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -83,7 +84,7 @@ export default function Profile() {
     setLoading(true);
     try {
       const res = await axios.put(
-        'http://localhost:5001/api/users/change-password',
+        `${API_BASE_URL}/api/users/change-password`,
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );

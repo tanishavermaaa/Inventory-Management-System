@@ -4,6 +4,7 @@ import SupplierSidebar from '../components/SupplierSidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
 export default function SupplierOrders() {
   const [orders,       setOrders]       = useState([]);
@@ -42,7 +43,7 @@ export default function SupplierOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/orders/supplier', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/orders/supplier`, { headers });
       setOrders(res.data);
     } catch (err) {
       showToast('Failed to load orders', 'error');
@@ -81,7 +82,7 @@ export default function SupplierOrders() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5001/api/orders/${id}/supplier-status`,
+      await axios.put(`${API_BASE_URL}/api/orders/${id}/supplier-status`,
         { status }, { headers });
       showToast(`Order ${status}!`, 'success');
       fetchOrders();

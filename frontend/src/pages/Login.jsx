@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaBoxOpen } from 'react-icons/fa';
+import { API_BASE_URL } from '../config';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -63,7 +64,7 @@ export default function Login() {
     
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/login', form);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, form);
       sessionStorage.setItem('token', res.data.token);
       sessionStorage.setItem('user',  JSON.stringify(res.data.user));
 

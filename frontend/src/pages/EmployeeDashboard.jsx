@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import EmployeeSidebar from '../components/EmployeeSidebar';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
-const PROD_URL  = 'http://localhost:5001/api/products';
-const ORDER_URL = 'http://localhost:5001/api/orders';
+const PROD_URL  = `${API_BASE_URL}/api/products`;
+const ORDER_URL = `${API_BASE_URL}/api/orders`;
 
 export default function EmployeeDashboard() {
   const [products,   setProducts]   = useState([]);

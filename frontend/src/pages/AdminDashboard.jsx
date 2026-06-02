@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
+import { API_BASE_URL } from '../config';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
@@ -27,10 +28,10 @@ export default function AdminDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         const [catRes, prodRes, supRes, ordRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/categories', { headers }),
-          axios.get('http://localhost:5001/api/products', { headers }),
-          axios.get('http://localhost:5001/api/suppliers', { headers }),
-          axios.get('http://localhost:5001/api/orders/all', { headers })
+          axios.get(`${API_BASE_URL}/api/categories`, { headers }),
+          axios.get(`${API_BASE_URL}/api/products`, { headers }),
+          axios.get(`${API_BASE_URL}/api/suppliers`, { headers }),
+          axios.get(`${API_BASE_URL}/api/orders/all`, { headers })
         ]);
 
         setData({

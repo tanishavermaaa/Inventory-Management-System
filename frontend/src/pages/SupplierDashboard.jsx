@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import SupplierSidebar from '../components/SupplierSidebar';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
-const BASE = 'http://localhost:5001/api/products';
+const BASE = `${API_BASE_URL}/api/products`;
 
 export default function SupplierDashboard() {
   const [products,  setProducts]  = useState([]);
@@ -62,7 +63,7 @@ export default function SupplierDashboard() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/categories', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/categories`, { headers });
       setCategories(res.data);
     } catch (err) {
       console.error('Fetch categories error:', err);
@@ -154,7 +155,7 @@ export default function SupplierDashboard() {
     try {
       if (isNewCategory) {
         try {
-          await axios.post('http://localhost:5001/api/categories/add', { categoryName: form.category, categoryDescription: form.category }, { headers });
+          await axios.post(`${API_BASE_URL}/api/categories/add`, { categoryName: form.category, categoryDescription: form.category }, { headers });
           fetchCategories();
         } catch (err) {
           // Ignore if category already exists

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
 export default function AdminUserOrders() {
   const [orders,       setOrders]       = useState([]);
@@ -18,7 +19,7 @@ export default function AdminUserOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/orders/all', { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/orders/all`, { headers });
       setOrders(res.data);
     } catch (err) {
       showToast('Failed to load orders', 'error');
@@ -55,7 +56,7 @@ export default function AdminUserOrders() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5001/api/orders/${id}/status`,
+      await axios.put(`${API_BASE_URL}/api/orders/${id}/status`,
         { status }, { headers });
       showToast(`Order ${status}!`, 'success');
       fetchOrders();

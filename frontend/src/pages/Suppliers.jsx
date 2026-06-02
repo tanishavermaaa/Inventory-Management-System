@@ -4,8 +4,9 @@ import Sidebar from '../components/Sidebar';
 import Toast from '../components/Toast';
 import useToast from '../hooks/useToast';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
-const PRODUCT_BASE = 'http://localhost:5001/api/products';
+const PRODUCT_BASE = `${API_BASE_URL}/api/products`;
 
 export default function Suppliers() {
   const [products, setProducts] = useState([]);
@@ -37,7 +38,7 @@ export default function Suppliers() {
   // Fetch restock orders placed by this admin
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/orders/mine', {
+      const res = await axios.get(`${API_BASE_URL}/api/orders/mine`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(res.data);
@@ -100,7 +101,7 @@ export default function Suppliers() {
     if (quantity < 1000) { setQtyError('Quantity must be at least 1000.'); return; }
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/orders/place',
+      await axios.post(`${API_BASE_URL}/api/orders/place`,
         { productId: orderModal.product._id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import socket from '../socket';
+import { API_BASE_URL } from '../config';
 
-const BASE = 'http://localhost:5001/api/categories';
+const BASE = `${API_BASE_URL}/api/categories`;
 
 export default function Categories() {
   const [categories,    setCategories]    = useState([]);

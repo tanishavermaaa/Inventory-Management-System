@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaBoxOpen } from 'react-icons/fa';
+import { API_BASE_URL } from '../config';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'user' });
@@ -19,7 +20,7 @@ export default function Register() {
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:5001/api/auth/admin-exists')
+    axios.get(`${API_BASE_URL}/api/auth/admin-exists`)
       .then(res => setAdminExists(res.data.exists))
       .catch(err => console.error(err));
   }, []);
@@ -93,7 +94,7 @@ export default function Register() {
     setLoading(true);
     try {
       const { confirmPassword, ...submitData } = form;
-      await axios.post('http://localhost:5001/api/auth/register', submitData);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, submitData);
       setSuccess("Account created successfully!");
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
