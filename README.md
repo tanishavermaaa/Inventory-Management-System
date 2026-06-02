@@ -1,11 +1,48 @@
-# Inventory Management System (IMS)
+Here is the complete, updated markdown content for your `README.md` file that you can copy and paste:
 
-A complete MERN stack Inventory Management System featuring:
-- **Sole Admin Security Guards**: Protects logout/removal loops, user demotion safety, and blocks redundant admin registrations.
-- **Session-Isolated Authentication**: Employs `sessionStorage` instead of `localStorage` to allow parallel, independent user and admin testing inside the same browser (different tabs).
-- **Modern Compact UI/UX**: Tighter Sidebar alignment and less vertical spacing.
-- **Table Pagination**: Frontend pagination (8 items per page generally, 5 items per page for Admin Orders) and filters built into all list layouts.
-- **Real-Time Notification System**: Fully integrated with Socket.io for immediate notifications on order placements, approvals, and account closures.
+```markdown
+# 📦 Inventory Management System (IMS)
+
+A complete, premium MERN stack Inventory Management System designed with modern design aesthetics, session-isolated authentication, real-time WebSocket communication, and robust role-based access control.
+
+🔗 **Live Application URL**: [https://inventorymngt.netlify.app/](https://inventorymngt.netlify.app/)
+
+---
+
+## 👥 Role-Based Access Control (3 User Roles)
+
+The system features three distinct, secure user roles, each equipped with custom dashboards and action sets:
+
+### 1. 👑 Sole Admin
+The ultimate controller of the inventory ecosystem, equipped with extra safety overrides to prevent admin lockout or deletion loops.
+* **User Management**: View all registered users, promote members to admin, demote admins to regular users, or delete accounts securely.
+* **Category Control**: Create, view, edit, and delete product categories.
+* **Product Inventory**: Add new products, update prices and stock levels, and delete items.
+* **Order Overseer**: Monitor all incoming employee orders, approve/reject requests, and automatically notify suppliers when stock runs low.
+* **Supplier Coordination**: Assign specific products to suppliers for automated restocking pipelines.
+
+### 2. 💼 Employee
+The operational team members who manage daily sales, restocking requests, and profile details.
+* **Dynamic Catalog**: Browse all available products with live pagination, category filters, and search functionality.
+* **Order Placement**: Initiate orders for inventory items with automatic quantity/stock validation.
+* **Order Tracking**: View personal order history, track live statuses (Pending, Approved, Shipped, Cancelled), and cancel pending orders.
+* **Profile Management**: Update personal info and change account passwords securely.
+
+### 3. 🚚 Supplier
+External partners who fulfill inventory restocking requests in real-time.
+* **Stock Monitoring**: View products assigned specifically to them and monitor current stock quantities.
+* **Supply Chain Management**: Review orders dispatched to them, update shipping/delivery statuses, and coordinate fulfillment.
+* **Live Alerts**: Receive instant notifications when admins request stock fulfillment.
+
+---
+
+## ✨ Premium Features
+
+* **Real-Time WebSocket Notifications**: Powered by `Socket.io` to deliver instantaneous alerts across all roles when orders are placed, statuses change, or inventories are updated.
+* **Session-Isolated Authentication**: Employs `sessionStorage` instead of `localStorage`. This allows developers and testers to run parallel, independent admin, employee, and supplier sessions inside different tabs of the same browser!
+* **Robust Security & Guards**: Safe demotion triggers, blockages for duplicate admin registrations, and sole-admin deletion protection.
+* **Modern Compact UI/UX**: Designed with smooth CSS layouts, responsive sidebars, micro-interactions, clean tables, and tight typography.
+* **Advanced Table Pagination**: Built-in client-side pagination (8 items per page generally, 5 items per page for Admin Orders) and filters across all listings to ensure speed and performance.
 
 ---
 
@@ -27,7 +64,7 @@ cd backend
    - *What it does*: Connects the backend server to MongoDB to store/retrieve products, users, and orders.
    - *Install command*: `npm install mongoose`
 3. **`cors`** (Cross-Origin Resource Sharing helper)
-   - *What it does*: Allows the frontend app (running on port 5173) to talk to the backend app (running on port 5000) without getting blocked by the browser.
+   - *What it does*: Allows the frontend app to talk to the backend app without getting blocked by the browser.
    - *Install command*: `npm install cors`
 4. **`dotenv`** (Environment Config Loader)
    - *What it does*: Reads configurations (like database URL and passwords) securely from the `.env` file.
@@ -84,14 +121,14 @@ cd frontend
 
 ---
 
-## 🚀 Step-by-Step Setup Guide
+## 🚀 Step-by-Step Local Setup Guide
 
-Follow these steps to deploy and run both parts:
+Follow these steps to run the project locally:
 
 ### 1. Configure Backend Variables
 Create a file named `.env` inside the `backend` folder and add:
 ```env
-PORT=5000
+PORT=5001
 MONGO_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_jwt_signature_secret_key
 ```
@@ -110,3 +147,4 @@ npm install
 npm run dev
 ```
 *(Open the link shown in the terminal, usually `http://localhost:5173`)*
+```
