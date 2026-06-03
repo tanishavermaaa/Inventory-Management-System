@@ -30,19 +30,19 @@ The operational team members who manage daily sales, restocking requests, and pr
 
 ### 3. 🚚 Supplier
 External partners who fulfill inventory restocking requests in real-time.
-* **Stock Monitoring**: View products assigned specifically to them and monitor current stock quantities.
-* **Supply Chain Management**: Review orders dispatched to them, update shipping/delivery statuses, and coordinate fulfillment.
-* **Live Alerts**: Receive instant notifications when admins request stock fulfillment.
+* Stock Monitoring: View products assigned specifically to them and monitor current stock quantities.
+* Supply Chain Management: Review orders dispatched to them, update shipping/delivery statuses, and coordinate fulfillment.
+* Live Alerts: Receive instant notifications when admins request stock fulfillment.
 
 ---
 
 ## ✨ Premium Features
 
-* **Real-Time WebSocket Notifications**: Powered by `Socket.io` to deliver instantaneous alerts across all roles when orders are placed, statuses change, or inventories are updated.
-* **Session-Isolated Authentication**: Employs `sessionStorage` instead of `localStorage`. This allows developers and testers to run parallel, independent admin, employee, and supplier sessions inside different tabs of the same browser!
-* **Robust Security & Guards**: Safe demotion triggers, blockages for duplicate admin registrations, and sole-admin deletion protection.
-* **Modern Compact UI/UX**: Designed with smooth CSS layouts, responsive sidebars, micro-interactions, clean tables, and tight typography.
-* **Advanced Table Pagination**: Built-in client-side pagination (8 items per page generally, 5 items per page for Admin Orders) and filters across all listings to ensure speed and performance.
+* Real-Time WebSocket Notifications: Powered by `Socket.io` to deliver instantaneous alerts across all roles when orders are placed, statuses change, or inventories are updated.
+* Session-Isolated Authentication: Employs `sessionStorage` instead of `localStorage`. This allows developers and testers to run parallel, independent admin, employee, and supplier sessions inside different tabs of the same browser!
+* Robust Security & Guards: Safe demotion triggers, blockages for duplicate admin registrations, and sole-admin deletion protection.
+* Modern Compact UI/UX: Designed with smooth CSS layouts, responsive sidebars, micro-interactions, clean tables, and tight typography.
+* Advanced Table Pagination: Built-in client-side pagination (8 items per page generally, 5 items per page for Admin Orders) and filters across all listings to ensure speed and performance.
 
 ---
 
