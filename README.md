@@ -147,4 +147,3 @@ npm install
 npm run dev
 ```
 *(Open the link shown in the terminal, usually `http://localhost:5173`)*
-```
