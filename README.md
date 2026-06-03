@@ -5,7 +5,7 @@ Here is the complete, updated markdown content for your `README.md` file that yo
 
 A complete, premium MERN stack Inventory Management System designed with modern design aesthetics, session-isolated authentication, real-time WebSocket communication, and robust role-based access control.
 
-🔗 **Live Application URL**: https://inventorymngt.netlify.app/
+🔗 Live Application URL: https://inventorymngt.netlify.app/
 
 ---
 
