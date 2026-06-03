@@ -15,18 +15,18 @@ The system features three distinct, secure user roles, each equipped with custom
 
 ### 1. 👑 Sole Admin
 The ultimate controller of the inventory ecosystem, equipped with extra safety overrides to prevent admin lockout or deletion loops.
-* **User Management**: View all registered users, promote members to admin, demote admins to regular users, or delete accounts securely.
-* **Category Control**: Create, view, edit, and delete product categories.
-* **Product Inventory**: Add new products, update prices and stock levels, and delete items.
-* **Order Overseer**: Monitor all incoming employee orders, approve/reject requests, and automatically notify suppliers when stock runs low.
-* **Supplier Coordination**: Assign specific products to suppliers for automated restocking pipelines.
+* User Management: View all registered users, promote members to admin, demote admins to regular users, or delete accounts securely.
+* Category Control: Create, view, edit, and delete product categories.
+* Product Inventory: Add new products, update prices and stock levels, and delete items.
+* Order Overseer: Monitor all incoming employee orders, approve/reject requests, and automatically notify suppliers when stock runs low.
+* Supplier Coordination: Assign specific products to suppliers for automated restocking pipelines.
 
 ### 2. 💼 Employee
 The operational team members who manage daily sales, restocking requests, and profile details.
-* **Dynamic Catalog**: Browse all available products with live pagination, category filters, and search functionality.
-* **Order Placement**: Initiate orders for inventory items with automatic quantity/stock validation.
-* **Order Tracking**: View personal order history, track live statuses (Pending, Approved, Shipped, Cancelled), and cancel pending orders.
-* **Profile Management**: Update personal info and change account passwords securely.
+* Dynamic Catalog: Browse all available products with live pagination, category filters, and search functionality.
+* Order Placement: Initiate orders for inventory items with automatic quantity/stock validation.
+* Order Tracking: View personal order history, track live statuses (Pending, Approved, Shipped, Cancelled), and cancel pending orders.
+* Profile Management: Update personal info and change account passwords securely.
 
 ### 3. 🚚 Supplier
 External partners who fulfill inventory restocking requests in real-time.
